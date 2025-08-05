@@ -1,8 +1,7 @@
-
 {
   "name": "test_task",
   "version": "0.0.1",
-  "description": "",
+  "description": "NestJS REST API with JWT authentication, PostgreSQL, and Redis caching",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -12,23 +11,40 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+
     "test": "jest src",
     "test:watch": "jest --watch src",
     "test:cov": "jest --coverage src",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand src",
     "test:e2e": "jest test --testTimeout=30000",
+
     "migration:generate": "typeorm-ts-node-commonjs -d ormconfig.ts migration:generate",
     "migration:create": "typeorm-ts-node-commonjs -d ormconfig.ts migration:create",
     "migration:run": "typeorm-ts-node-commonjs -d ormconfig.ts migration:run",
     "migration:revert": "typeorm-ts-node-commonjs -d ormconfig.ts migration:revert",
-    "db:setup": "npm run migration:run",
+
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
+    "docker:down": "docker-compose down -v",
     "docker:logs": "docker-compose logs -f",
-    "setup": "node scripts/setup-db.js",
-    "dev": "npm run setup && npm run start:dev",
-    "test-db": "node scripts/test-connection.js",
-    "test-redis": "node scripts/test-reddis-connection.js"
+    "docker:restart": "npm run docker:down && npm run docker:up",
+
+    "db:wait": "node -e \"const{execSync}=require('child_process');let retries=30;const wait=()=>{try{execSync('docker exec articles-postgres pg_isready -U postgres',{stdio:'ignore'});console.log('✅ PostgreSQL ready')}catch{if(--retries>0){console.log('⏳ Waiting for PostgreSQL...');setTimeout(wait,2000)}else{console.error('❌ PostgreSQL timeout');process.exit(1)}}};wait()\"",
+    "redis:wait": "node -e \"const{execSync}=require('child_process');let retries=30;const wait=()=>{try{execSync('docker exec articles-redis redis-cli ping',{stdio:'ignore'});console.log('✅ Redis ready')}catch{if(--retries>0){console.log('⏳ Waiting for Redis...');setTimeout(wait,2000)}else{console.error('❌ Redis timeout');process.exit(1)}}};wait()\"",
+
+    "db:setup": "node scripts/setup-db.js && npm run migration:run",
+    "test:connections": "npm run test:db && npm run test:redis",
+    "test:db": "node scripts/test-connection.js",
+    "test:redis": "node scripts/test-reddis-connection.js",
+
+    "setup:full": "npm run docker:up && npm run db:wait && npm run redis:wait && npm run db:setup && npm run test:connections",
+    "setup:dev": "npm run setup:full && npm run start:dev",
+    "setup:quick": "npm run docker:restart && npm run db:wait && npm run redis:wait && npm run start:dev",
+
+    "clean": "npm run docker:down && docker system prune -f",
+    "reset": "npm run clean && npm run setup:full",
+
+    "dev": "npm run setup:dev",
+    "quick": "npm run setup:quick"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
