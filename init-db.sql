@@ -1,0 +1,3 @@
+ALTER USER postgres PASSWORD 'password';
+CREATE DATABASE IF NOT EXISTS articles_db;
+GRANT ALL PRIVILEGES ON DATABASE articles_db TO postgres;
