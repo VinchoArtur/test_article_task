@@ -26,7 +26,7 @@ import { ArticlesService } from '../services/article.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { User } from '../../users/entities/user.entity';
-import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { CurrentUser } from '../../common/decorators/user.decorator';
 import { QueryArticleDto } from '../dto/query-article.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import {
